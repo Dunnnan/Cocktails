@@ -22,8 +22,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
@@ -61,31 +63,38 @@ fun CocktailList() {
 @Composable
 fun CocktailListItem(cocktail: Cocktail, expandedCocktail: String?, onCocktailClick: (String) -> Unit) {
     Spacer(modifier = Modifier.height(8.dp))
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+    val imageSize = if (isLandscape) 450.dp else 300.dp
+    val paddingSize = if (isLandscape) 16.dp else 8.dp
+    val textSize = if (isLandscape) 48.sp else 30.sp
+
     Column(modifier = Modifier
         .fillMaxWidth()
         .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
         .shadow(4.dp)
         .clickable { onCocktailClick(cocktail.name) }
         .animateContentSize()
-        .padding(8.dp),
+        .padding(paddingSize),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AsyncImage(
             model = cocktail.imageUrl,
             contentDescription = "Obrazek koktajlu",
             modifier = Modifier
-                .padding(8.dp)
-                .size(300.dp)
+                .padding(paddingSize)
+                .size(imageSize)
                 .clip(RoundedCornerShape(26.dp))
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             textAlign = TextAlign.Center,
             text = cocktail.name,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineLarge.copy(fontSize = textSize),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(paddingSize*2)
         )
         if (expandedCocktail == cocktail.name) {
             CocktailDetail(cocktail)
@@ -97,12 +106,19 @@ fun CocktailListItem(cocktail: Cocktail, expandedCocktail: String?, onCocktailCl
 fun CocktailDetail(cocktail: Cocktail) {
     Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Składniki:", style = MaterialTheme.typography.headlineSmall)
+
+        val configuration = LocalConfiguration.current
+        val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+        val headerSize = if (isLandscape) 40.sp else 28.sp
+        val textSize = if (isLandscape) 32.sp else 20.sp
+
+        Text(text = "Składniki:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
         cocktail.ingredients.forEach { ingredient ->
-            Text(text = "• $ingredient", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "• $ingredient", style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize))
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Sposób przygotowania:", style = MaterialTheme.typography.headlineSmall)
-        Text(text = cocktail.recipe, style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Sposób przygotowania:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
+        Text(text = cocktail.recipe, style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize))
     }
 }
