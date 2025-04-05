@@ -104,6 +104,8 @@ fun CocktailListItem(cocktail: Cocktail, expandedCocktail: String?, onCocktailCl
 
 @Composable
 fun CocktailDetail(cocktail: Cocktail) {
+    timerElement();
+
     Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -112,6 +114,7 @@ fun CocktailDetail(cocktail: Cocktail) {
 
         val headerSize = if (isLandscape) 40.sp else 28.sp
         val textSize = if (isLandscape) 32.sp else 20.sp
+
 
         Text(text = "Składniki:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
         cocktail.ingredients.forEach { ingredient ->
