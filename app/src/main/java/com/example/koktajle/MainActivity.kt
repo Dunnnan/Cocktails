@@ -1,6 +1,7 @@
 package com.example.koktajle
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateContentSize
@@ -10,11 +11,28 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,14 +41,24 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.example.koktajle.data.CocktailsBase
 import com.example.koktajle.models.Cocktail
+import com.google.gson.Gson
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,25 +71,48 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CocktailApp() {
-    CocktailList()
+    val navController = rememberNavController()
+    val gson = Gson()
+
+    NavHost(navController = navController, startDestination = "list") {
+        composable("list") {
+            CocktailList(onCocktailClick = { cocktail ->
+                val encoded = URLEncoder.encode(gson.toJson(cocktail), "UTF-8")
+                navController.navigate("details/$encoded")
+            })
+        }
+
+        composable(
+            route = "details/{cocktail}",
+            arguments = listOf(navArgument("cocktail") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val json = backStackEntry.arguments?.getString("cocktail")?.let { URLDecoder.decode(it, "UTF-8") }
+            val cocktail = gson.fromJson(json, Cocktail::class.java)
+            CocktailDetailScreen(cocktail, navController)
+        }
+    }
 }
 
 @Composable
-fun CocktailList() {
+fun CocktailList(onCocktailClick: (Cocktail) -> Unit) {
     val cocktails = CocktailsBase.cocktails
-    var expandedCocktail by remember { mutableStateOf<String?>(null) }
 
-    LazyColumn {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 160.dp),
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         items(cocktails) { cocktail ->
-            CocktailListItem(cocktail, expandedCocktail, onCocktailClick = {
-                expandedCocktail = if (expandedCocktail == cocktail.name) null else cocktail.name
+            CocktailCardItem(cocktail = cocktail, onCocktailClick = {
+                onCocktailClick(cocktail)
             })
         }
     }
 }
 
 @Composable
-fun CocktailListItem(cocktail: Cocktail, expandedCocktail: String?, onCocktailClick: (String) -> Unit) {
+fun CocktailCardItem(cocktail: Cocktail, onCocktailClick: (String) -> Unit) {
     Spacer(modifier = Modifier.height(8.dp))
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -96,32 +147,72 @@ fun CocktailListItem(cocktail: Cocktail, expandedCocktail: String?, onCocktailCl
                 .fillMaxWidth()
                 .padding(paddingSize*2)
         )
-        if (expandedCocktail == cocktail.name) {
-            CocktailDetail(cocktail)
-        }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CocktailDetail(cocktail: Cocktail) {
-    timerElement();
+fun CocktailDetailScreen(cocktail: Cocktail, navController: NavController) {
 
-    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
-        Spacer(modifier = Modifier.height(8.dp))
+    val context = LocalContext.current
 
-        val configuration = LocalConfiguration.current
-        val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    Scaffold (
+        topBar = {
+            TopAppBar(
+                title = { Text(text = cocktail.name)},
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        },
 
-        val headerSize = if (isLandscape) 40.sp else 28.sp
-        val textSize = if (isLandscape) 32.sp else 20.sp
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                Toast.makeText(context, "Składniki: \n ${cocktail.ingredients.joinToString()}", Toast.LENGTH_SHORT).show()
+            }) {
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send SMS")
+            }
+        },
+
+        content = { paddingValues ->
+
+            Column(modifier = Modifier
+                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
 
 
-        Text(text = "Składniki:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
-        cocktail.ingredients.forEach { ingredient ->
-            Text(text = "• $ingredient", style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize))
+                val configuration = LocalConfiguration.current
+                val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+                val headerSize = if (isLandscape) 40.sp else 28.sp
+                val textSize = if (isLandscape) 32.sp else 20.sp
+
+                AsyncImage(
+                    model = cocktail.imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+
+                timerElement();
+
+                Text(text = "Składniki:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
+                cocktail.ingredients.forEach { ingredient ->
+                    Text(text = "• $ingredient", style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Sposób przygotowania:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
+                Text(text = cocktail.recipe, style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize))
+            }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Sposób przygotowania:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
-        Text(text = cocktail.recipe, style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize))
-    }
+    )
 }
