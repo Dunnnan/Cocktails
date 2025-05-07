@@ -7,7 +7,29 @@ object CocktailsBase {
         Cocktail(
             name = "Mojito",
             ingredients = listOf("Rum", "Cukier", "Limonka", "Mięta", "Woda gazowana"),
-            recipe = "Połącz rum, cukier, miętę, limonkę, dodaj wodę gazowaną i lód.",
+            recipe = "Przygotowanie mięty:\n" +
+                    "Na początek umyj świeże liście mięty. Użyj około 8-10 liści (możesz dodać więcej, jeśli lubisz intensywniejszy smak). Delikatnie wciśnij liście w dłoni, aby uwolnić ich aromat, a następnie wrzuć je do szklanki.\n" +
+                    "\n" +
+                    "Limonka:\n" +
+                    "Limonkę umyj, pokrój na ćwiartki, a potem wrzuć ją do szklanki z miętą. Za pomocą muddlera (czyli specjalnego narzędzia do zgniatania składników) lub końcówki łyżki, delikatnie ugnieć limonkę i miętę, aby uwolnić sok z limonki i zapach mięty. Staraj się nie zgnieść limonki zbyt mocno, żeby nie wydobyć z niej goryczy.\n" +
+                    "\n" +
+                    "Cukier:\n" +
+                    "Dodaj do szklanki 1-2 łyżeczki cukru, w zależności od tego, jak słodki ma być Twój drink. Możesz użyć cukru białego, brązowego, lub nawet syropu cukrowego, jeśli wolisz. Delikatnie wymieszaj, aby cukier zaczął się rozpuszczać w soku z limonki i miętą.\n" +
+                    "\n" +
+                    "Rum:\n" +
+                    "Wlej do szklanki 50 ml białego rumu. W zależności od tego, jak mocno chcesz poczuć alkohol, możesz dostosować ilość rumu, ale 50 ml to typowa porcja na jeden drink.\n" +
+                    "\n" +
+                    "Lód:\n" +
+                    "Napełnij szklankę do połowy lub całości kostkami lodu (lub innymi kawałkami lodu, jeśli lubisz intensywniejszy chłód).\n" +
+                    "\n" +
+                    "Woda gazowana:\n" +
+                    "Dodaj około 200 ml wody gazowanej. Możesz dodać więcej, jeśli chcesz, aby drink był bardziej rozcieńczony i orzeźwiający. Dobrze jest wybrać wodę gazowaną z dużą ilością bąbelków, aby całość była lekka i musująca.\n" +
+                    "\n" +
+                    "Mieszanie:\n" +
+                    "Wszystko delikatnie wymieszaj łyżką barową, aby składniki się połączyły, a cukier się całkowicie rozpuścił.\n" +
+                    "\n" +
+                    "Dekoracja:\n" +
+                    "Udekoruj drink świeżymi liśćmi mięty na wierzchu i – jeśli chcesz – kawałkiem limonki. Możesz także dodać słomkę, by wygodnie pić.",
             imageUrl = "https://ms-fox.pl/wp-content/uploads/2022/02/mojito-1300x1294.jpg"
         ),
         Cocktail(
