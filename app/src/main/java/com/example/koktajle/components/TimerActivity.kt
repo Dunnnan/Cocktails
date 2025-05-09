@@ -1,8 +1,6 @@
-    package com.example.koktajle
+package com.example.koktajle.components
 
-    import android.graphics.Color.rgb
     import androidx.compose.foundation.layout.Arrangement
-    import androidx.compose.foundation.layout.Box
     import androidx.compose.foundation.layout.fillMaxWidth
     import androidx.compose.foundation.layout.padding
     import androidx.compose.material3.Button

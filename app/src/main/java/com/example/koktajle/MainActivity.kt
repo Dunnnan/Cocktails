@@ -66,6 +66,16 @@ import java.net.URLEncoder
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.ui.input.key.Key.Companion.Home
+import androidx.compose.ui.res.painterResource
+import com.example.koktajle.components.DrawerContent
+import com.example.koktajle.screens.CocktailDetailScreen
+import com.example.koktajle.screens.CocktailList
+import com.example.koktajle.screens.Home
 
 
 class MainActivity : ComponentActivity() {
@@ -84,198 +94,66 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CocktailApp(darkTheme: MutableState<Boolean>) {
     val navController = rememberNavController()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
     val gson = Gson()
 
-    NavHost(navController = navController, startDestination = "list") {
-        composable("list") {
-            CocktailList(onCocktailClick = { cocktail ->
-                val encoded = URLEncoder.encode(gson.toJson(cocktail), "UTF-8")
-                navController.navigate("details/$encoded")
-            },
-                darkTheme = darkTheme
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            DrawerContent(
+                navController = navController,
+                drawerState = drawerState,
+                scope = scope,
+                darkTheme = darkTheme.value
             )
         }
-
-        composable(
-            route = "details/{cocktail}",
-            arguments = listOf(navArgument("cocktail") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val json = backStackEntry.arguments?.getString("cocktail")?.let { URLDecoder.decode(it, "UTF-8") }
-            val cocktail = gson.fromJson(json, Cocktail::class.java)
-            CocktailDetailScreen(cocktail, navController, darkTheme)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CocktailList(onCocktailClick: (Cocktail) -> Unit, darkTheme: MutableState<Boolean>) {
-    val cocktails = CocktailsBase.cocktails
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Lista koktajli") },
-                actions = {
-                    IconButton(onClick = { darkTheme.value = !darkTheme.value }) {
-                        Icon(
-                            imageVector = if (darkTheme.value) Icons.Default.LightMode else Icons.Default.DarkMode,
-                            contentDescription = "Przełącz motyw"
-                        )
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 250.dp),
-            contentPadding = PaddingValues(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(padding)
-        ) {
-            items(cocktails) { cocktail ->
-                CocktailCardItem(cocktail = cocktail, onCocktailClick = {
-                    onCocktailClick(cocktail)
-                })
-            }
-        }
-    }
-}
-
-
-@Composable
-fun CocktailCardItem(cocktail: Cocktail, onCocktailClick: (String) -> Unit) {
-    //Spacer(modifier = Modifier.height(8.dp))
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-
-    val textSize by remember {
-        derivedStateOf {
-            if (isLandscape) 38.sp else 30.sp
-        }
-    }
-
-    val imageSize = if (isLandscape) 450.dp else 300.dp
-    val paddingSize = if (isLandscape) 16.dp else 8.dp
-
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .height(imageSize + 100.dp)
-        .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
-        .shadow(4.dp, ambientColor = MaterialTheme.colorScheme.primary , spotColor = MaterialTheme.colorScheme.primary)
-        .clickable { onCocktailClick(cocktail.name) }
-        .animateContentSize()
-        .padding(paddingSize)
     ) {
-        AsyncImage(
-            model = cocktail.imageUrl,
-            contentDescription = "Obrazek koktajlu",
-            modifier = Modifier
-                .padding(paddingSize)
-                .size(imageSize)
-                .clip(RoundedCornerShape(26.dp))
-                .align(Alignment.TopCenter) ,
-            contentScale = ContentScale.FillBounds,
-
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            textAlign = TextAlign.Center,
-            text = cocktail.name,
-            style = MaterialTheme.typography.headlineLarge.copy(fontSize = textSize),
-            modifier = Modifier
-                .fillMaxWidth()
-                //.padding(paddingSize)
-                .align(Alignment.BottomCenter)
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CocktailDetailScreen(cocktail: Cocktail, navController: NavController, darkTheme: MutableState<Boolean>) {
-    val context = LocalContext.current
-
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = cocktail.name)
-                    AsyncImage(
-                        model = cocktail.imageUrl,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .height(68.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                }
-                        },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { darkTheme.value = !darkTheme.value }) {
-                        Icon(
-                            imageVector = if (darkTheme.value) Icons.Default.LightMode else Icons.Default.DarkMode,
-                            contentDescription = "Przełącz motyw"
-                        )
-                    }
-                },
-                modifier = Modifier.height(96.dp)
-            )
-        },
-
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                Toast.makeText(context, "Składniki: \n ${cocktail.ingredients.joinToString()}", Toast.LENGTH_SHORT).show()
-            }) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send SMS")
+        NavHost(navController = navController, startDestination = "home") {
+            composable("home") {
+                Home(
+                    drawerState = drawerState,
+                    scope = scope,
+                    darkTheme = darkTheme
+                )
             }
-        },
 
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Spacer(modifier = Modifier.height(8.dp))
+            composable("all") {
+                CocktailList(
+                    onCocktailClick = { cocktail ->
+                        val encoded = URLEncoder.encode(gson.toJson(cocktail), "UTF-8")
+                        navController.navigate("details/$encoded")
+                    },
+                    filter = { true },
+                    darkTheme = darkTheme,
+                    scope = scope,
+                    drawerState = drawerState
+                )
+            }
 
-                val configuration = LocalConfiguration.current
-                val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+            composable("vodka") {
+                CocktailList(
+                    onCocktailClick = { cocktail ->
+                        val encoded = URLEncoder.encode(gson.toJson(cocktail), "UTF-8")
+                        navController.navigate("details/$encoded")
+                    },
+                    filter = { it.ingredients.any { ing -> ing.contains("wódka", ignoreCase = true) } },
+                    darkTheme = darkTheme,
+                    scope = scope,
+                    drawerState = drawerState
+                )
+            }
 
-                val headerSize = if (isLandscape) 40.sp else 28.sp
-                val textSize = if (isLandscape) 32.sp else 20.sp
-
-//                AsyncImage(
-//                    model = cocktail.imageUrl,
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(240.dp)
-//                        .clip(RoundedCornerShape(16.dp))
-//                )
-
-                timerElement() // Upewnij się, że masz tę funkcję!
-
-                Text(text = "Składniki:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
-                cocktail.ingredients.forEach { ingredient ->
-                    Text(text = "• $ingredient", style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize))
+            composable(
+                route = "details/{cocktail}",
+                arguments = listOf(navArgument("cocktail") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val json = backStackEntry.arguments?.getString("cocktail")?.let {
+                    URLDecoder.decode(it, "UTF-8")
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Sposób przygotowania:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
-                Text(text = cocktail.recipe, style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize))
+                val cocktail = gson.fromJson(json, Cocktail::class.java)
+                CocktailDetailScreen(cocktail, navController, darkTheme)
             }
         }
-    )
+    }
 }
