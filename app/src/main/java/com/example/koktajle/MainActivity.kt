@@ -1,89 +1,55 @@
 package com.example.koktajle
 
+import android.os.Build
 import android.os.Bundle
-import android.widget.GridLayout
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.contentColorFor
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
-import com.example.koktajle.data.CocktailsBase
+import com.example.koktajle.components.DrawerContent
 import com.example.koktajle.models.Cocktail
+import com.example.koktajle.screens.CocktailDetailScreen
+import com.example.koktajle.screens.CocktailList
+import com.example.koktajle.screens.Home
 import com.example.koktajle.ui.theme.KoktajleTheme
 import com.google.gson.Gson
 import java.net.URLDecoder
 import java.net.URLEncoder
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.ui.input.key.Key.Companion.Home
-import androidx.compose.ui.res.painterResource
-import com.example.koktajle.components.DrawerContent
-import com.example.koktajle.screens.CocktailDetailScreen
-import com.example.koktajle.screens.CocktailList
-import com.example.koktajle.screens.Home
 
+val enterTransition = fadeIn(animationSpec = tween(500)) // animacja wchodzenia
+val exitTransition = fadeOut(animationSpec = tween(500)) // animacja wychodzenia
+
+val popEnterTransition = slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(500)) // animacja przy powrocie
+val popExitTransition = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(500)) // animacja przy powrocie
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         setContent {
             val darkTheme = remember { mutableStateOf(false) }
-
             KoktajleTheme(darkTheme = darkTheme.value) {
                 CocktailApp(darkTheme)
             }
@@ -91,6 +57,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CocktailApp(darkTheme: MutableState<Boolean>) {
     val navController = rememberNavController()
@@ -110,7 +77,14 @@ fun CocktailApp(darkTheme: MutableState<Boolean>) {
         }
     ) {
         NavHost(navController = navController, startDestination = "home") {
-            composable("home") {
+            composable(
+                "home",
+                enterTransition = { return@composable fadeIn() + slideInVertically(initialOffsetY  = { 1000 }) },
+                exitTransition = { return@composable fadeOut() },
+                popExitTransition = { return@composable fadeOut() },
+                popEnterTransition = { return@composable fadeIn() + slideInVertically(initialOffsetY  = { 1000 }) },
+            )
+            {
                 Home(
                     drawerState = drawerState,
                     scope = scope,
@@ -131,7 +105,11 @@ fun CocktailApp(darkTheme: MutableState<Boolean>) {
                 )
             }
 
-            composable("vodka") {
+            composable("vodka",
+                enterTransition = { return@composable fadeIn() },
+                popExitTransition = { return@composable fadeOut() },
+                ) {
+
                 CocktailList(
                     onCocktailClick = { cocktail ->
                         val encoded = URLEncoder.encode(gson.toJson(cocktail), "UTF-8")
@@ -145,6 +123,13 @@ fun CocktailApp(darkTheme: MutableState<Boolean>) {
             }
 
             composable(
+                enterTransition = { return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(700)
+                ) },
+                popExitTransition = { return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(700)
+                ) },
+
                 route = "details/{cocktail}",
                 arguments = listOf(navArgument("cocktail") { type = NavType.StringType })
             ) { backStackEntry ->

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Zoom In/Out Animation -->
+    <objectAnimator
+        android:propertyName="scaleX"
+        android:duration="650"
+        android:valueFrom="0.7"
+        android:valueTo="1.85"
+        android:repeatCount="1"
+        android:repeatMode="reverse"
+        android:interpolator="@android:interpolator/linear_out_slow_in"
+    android:valueType="floatType"/>
+
+    <objectAnimator
+        android:propertyName="scaleY"
+        android:duration="650"
+        android:valueFrom="0.75"
+        android:valueTo="1.85"
+        android:repeatCount="1"
+        android:repeatMode="reverse"
+        android:interpolator="@android:interpolator/linear_out_slow_in"
+    android:valueType="floatType"/>
+
+    <!-- Rotation Animation -->
+    <objectAnimator
+        android:propertyName="rotation"
+        android:duration="2500"
+        android:valueFrom="360"
+        android:valueTo="0"
+        android:repeatCount="0"
+        android:repeatMode="reverse"
+        android:interpolator="@android:interpolator/linear_out_slow_in"
+    android:valueType="floatType"/>
+
+</set>

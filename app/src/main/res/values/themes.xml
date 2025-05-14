@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.Koktajle" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
+        <item name="android:windowBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/animated_icon</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="postSplashScreenTheme">@android:style/Theme.Material.NoActionBar</item>
+    </style>
 </resources>
