@@ -1,108 +1,169 @@
 package com.example.koktajle
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
-import com.example.koktajle.data.CocktailsBase
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.koktajle.components.DrawerContent
+import com.example.koktajle.components.loadStartScreen
 import com.example.koktajle.models.Cocktail
+import com.example.koktajle.screens.CocktailDetailScreen
+import com.example.koktajle.screens.CocktailList
+import com.example.koktajle.screens.Home
+import com.example.koktajle.screens.Info
+import com.example.koktajle.ui.theme.KoktajleTheme
+import com.google.gson.Gson
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
+        val startScreen = loadStartScreen(this)
         setContent {
-            CocktailApp()
+            val isDarktheme = isSystemInDarkTheme()
+            var darkTheme = rememberSaveable { mutableStateOf(isDarktheme) }
+            KoktajleTheme(darkTheme = darkTheme.value) {
+                CocktailApp(darkTheme, startScreen)
+            }
         }
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun CocktailApp() {
-    CocktailList()
-}
+fun CocktailApp(darkTheme: MutableState<Boolean>, startScreen: String) {
+    val navController = rememberNavController()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val gson = Gson()
 
-@Composable
-fun CocktailList() {
-    val cocktails = CocktailsBase.cocktails
-    var expandedCocktail by remember { mutableStateOf<String?>(null) }
-
-    LazyColumn {
-        items(cocktails) { cocktail ->
-            CocktailListItem(cocktail, expandedCocktail, onCocktailClick = {
-                expandedCocktail = if (expandedCocktail == cocktail.name) null else cocktail.name
-            })
-        }
-    }
-}
-
-@Composable
-fun CocktailListItem(cocktail: Cocktail, expandedCocktail: String?, onCocktailClick: (String) -> Unit) {
-    Spacer(modifier = Modifier.height(8.dp))
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
-        .shadow(4.dp)
-        .clickable { onCocktailClick(cocktail.name) }
-        .animateContentSize()
-        .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+                DrawerContent(
+                    navController = navController,
+                    drawerState = drawerState,
+                    scope = scope,
+                    darkTheme = darkTheme
+                )
+            }
     ) {
-        AsyncImage(
-            model = cocktail.imageUrl,
-            contentDescription = "Obrazek koktajlu",
-            modifier = Modifier
-                .padding(8.dp)
-                .size(300.dp)
-                .clip(RoundedCornerShape(26.dp))
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            textAlign = TextAlign.Center,
-            text = cocktail.name,
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-        if (expandedCocktail == cocktail.name) {
-            CocktailDetail(cocktail)
-        }
-    }
-}
+        NavHost(navController = navController, startDestination = startScreen) {
+            composable(
+                "home",
+                enterTransition = { return@composable fadeIn() + slideInVertically(initialOffsetY  = { 1000 }) },
+                exitTransition = { return@composable fadeOut() },
+                popExitTransition = { return@composable fadeOut() },
+                popEnterTransition = { return@composable fadeIn() + slideInVertically(initialOffsetY  = { 1000 }) },
+            )
+            {
+                Home(
+                    drawerState = drawerState,
+                    scope = scope,
+                    darkTheme = darkTheme
+                )
+            }
 
-@Composable
-fun CocktailDetail(cocktail: Cocktail) {
-    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Składniki:", style = MaterialTheme.typography.headlineSmall)
-        cocktail.ingredients.forEach { ingredient ->
-            Text(text = "• $ingredient", style = MaterialTheme.typography.bodyMedium)
+            composable("all") {
+                CocktailList(
+                    onCocktailClick = { cocktail ->
+                        val encoded = URLEncoder.encode(gson.toJson(cocktail), "UTF-8")
+                        navController.navigate("details/$encoded")
+                    },
+                    filter = { true },
+                    darkTheme = darkTheme,
+                    scope = scope,
+                    drawerState = drawerState,
+                    navController = navController
+                )
+            }
+
+            composable("vodka") {
+                CocktailList(
+                    onCocktailClick = { cocktail ->
+                        val encoded = URLEncoder.encode(gson.toJson(cocktail), "UTF-8")
+                        navController.navigate("details/$encoded")
+                    },
+                    filter = { it.ingredients.any { ing -> ing.contains("wódka", ignoreCase = true) } },
+                    darkTheme = darkTheme,
+                    scope = scope,
+                    drawerState = drawerState,
+                    navController = navController
+                )
+            }
+
+            composable("nonalcoholic",
+            ) {
+                CocktailList(
+                    onCocktailClick = { cocktail ->
+                        val encoded = URLEncoder.encode(gson.toJson(cocktail), "UTF-8")
+                        navController.navigate("details/$encoded")
+                    },
+                    filter = { it.qualities.any { ing -> ing.contains("bezalkoholowy", ignoreCase = true) } },
+                    darkTheme = darkTheme,
+                    scope = scope,
+                    drawerState = drawerState,
+                    navController = navController
+                )
+            }
+
+            composable(
+                "info",
+                enterTransition = { return@composable fadeIn() + slideInVertically(initialOffsetY  = { 1000 }) },
+                exitTransition = { return@composable fadeOut() },
+                popExitTransition = { return@composable fadeOut() },
+                popEnterTransition = { return@composable fadeIn() + slideInVertically(initialOffsetY  = { 1000 }) },
+            )
+            {
+                Info(
+                    drawerState = drawerState,
+                    scope = scope,
+                    darkTheme = darkTheme
+                )
+            }
+
+            composable(
+                enterTransition = { return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(700)
+                ) },
+                popExitTransition = { return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(700)
+                ) },
+
+                route = "details/{cocktail}",
+                arguments = listOf(navArgument("cocktail") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val json = backStackEntry.arguments?.getString("cocktail")?.let {
+                    URLDecoder.decode(it, "UTF-8")
+                }
+                val cocktail = gson.fromJson(json, Cocktail::class.java)
+                CocktailDetailScreen(cocktail, navController, darkTheme)
+            }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Sposób przygotowania:", style = MaterialTheme.typography.headlineSmall)
-        Text(text = cocktail.recipe, style = MaterialTheme.typography.bodyMedium)
     }
 }
