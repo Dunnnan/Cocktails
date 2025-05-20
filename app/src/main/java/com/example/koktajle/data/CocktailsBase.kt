@@ -30,44 +30,74 @@ object CocktailsBase {
                     "\n" +
                     "Dekoracja:\n" +
                     "Udekoruj drink świeżymi liśćmi mięty na wierzchu i – jeśli chcesz – kawałkiem limonki. Możesz także dodać słomkę, by wygodnie pić.",
-            imageUrl = "https://ms-fox.pl/wp-content/uploads/2022/02/mojito-1300x1294.jpg"
-        ),
+            imageUrl = "https://ms-fox.pl/wp-content/uploads/2022/02/mojito-1300x1294.jpg",
+            qualities = listOf("alkoholowy", "prosty", "szybki")
+    ),
         Cocktail(
             name = "Martini",
             ingredients = listOf("Gin", "Wermut", "Lód"),
             recipe = "Wymieszaj gin z wermutem w szklance z lodem, odcedź do kieliszka.",
-            imageUrl ="https://krosno.com.pl/media/catalog/product/cache/e93b1ff2537986ecbd15357d4354a611/5/7/57_c735_0170_0e0_0204_00a.jpg"
+            imageUrl ="https://krosno.com.pl/media/catalog/product/cache/e93b1ff2537986ecbd15357d4354a611/5/7/57_c735_0170_0e0_0204_00a.jpg",
+            qualities = listOf("alkoholowy", "klasyczny", "prosty")
         ),
         Cocktail(
             name = "Piña Colada",
             ingredients = listOf("Rum", "Sok ananasowy", "Mleczko kokosowe", "Lód"),
             recipe = "Zblenduj rum, sok ananasowy, mleczko kokosowe i lód.",
-            imageUrl = "https://www.quoregelato.com/wp-content/uploads/2024/04/Quore_WebsitePic_PinaColada_Cocktail2_1200.jpg"
+            imageUrl = "https://www.quoregelato.com/wp-content/uploads/2024/04/Quore_WebsitePic_PinaColada_Cocktail2_1200.jpg",
+            qualities = listOf("alkoholowy", "efektowny")
         ),
         Cocktail(
             name = "Cosmopolitan",
             ingredients = listOf("Wódka", "Cointreau", "Sok żurawinowy", "Limonka"),
             recipe = "Wymieszaj składniki w shakerze z lodem, odcedź do kieliszka.",
-            imageUrl = "https://cdn.aniagotuje.com/pictures/articles/2023/07/45574135-v-1500x1500.jpg"
+            imageUrl = "https://cdn.aniagotuje.com/pictures/articles/2023/07/45574135-v-1500x1500.jpg",
+            qualities = listOf("alkoholowy", "klasyczny", "szybki")
         ),
         Cocktail(
             name = "Tequila Sunrise",
             ingredients = listOf("Tequila", "Sok pomarańczowy", "Grenadyna"),
             recipe = "Wlej tequilę, następnie sok pomarańczowy. Na koniec powoli wlej grenadynę.",
-            imageUrl = "https://images.food52.com/eugI6wPobQHqEMP9vQZG3AvQAIk=/1200x1200/8ef2cc65-724c-433c-b374-297e8eb1a4be--2020-0707_tequila-sunrise-cocktail_3x2_ty-mecham.jpg"
+            imageUrl = "https://images.food52.com/eugI6wPobQHqEMP9vQZG3AvQAIk=/1200x1200/8ef2cc65-724c-433c-b374-297e8eb1a4be--2020-0707_tequila-sunrise-cocktail_3x2_ty-mecham.jpg",
+            qualities = listOf("alkoholowy", "efektowny", "prosty")
         ),
         Cocktail(
             name = "Old Fashioned",
             ingredients = listOf("Bourbon", "Cukier", "Angostura Bitters", "Woda", "Skórka pomarańczy"),
             recipe = "Rozpuść cukier z angosturą i wodą, dodaj bourbon, wymieszaj i udekoruj skórką pomarańczy.",
-            imageUrl = "https://www.vindulge.com/wp-content/uploads/2024/02/Smoked-Old-Fashioned-FI.jpg"
+            imageUrl = "https://www.vindulge.com/wp-content/uploads/2024/02/Smoked-Old-Fashioned-FI.jpg",
+            qualities = listOf("alkoholowy", "klasyczny")
         ),
         Cocktail(
             name = "Negroni",
             ingredients = listOf("Gin", "Wermut czerwony", "Campari"),
             recipe = "Wymieszaj wszystkie składniki w szklance z lodem i udekoruj skórką pomarańczy.",
-            imageUrl = "https://www.liquor.com/thmb/cv0NfK7-V2iGs1gdHbnOTMqOwT0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/neighborhood-negroni-720x720-primary-727f7dc3a5d04a298d63977679efe856.jpg"
+            imageUrl = "https://www.liquor.com/thmb/cv0NfK7-V2iGs1gdHbnOTMqOwT0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/neighborhood-negroni-720x720-primary-727f7dc3a5d04a298d63977679efe856.jpg",
+            qualities = listOf("alkoholowy", "klasyczny")
+        ),
+
+        Cocktail(
+            name = "Virgin Mojito",
+            ingredients = listOf("Cukier", "Limonka", "Mięta", "Woda gazowana"),
+            recipe = "Zgnieć limonkę z cukrem i miętą, dopełnij wodą gazowaną i lodem. Wymieszaj i udekoruj miętą.",
+            imageUrl = "https://www.wysmakowane.pl/wp-content/uploads/2019/08/mojito.jpg",
+            qualities = listOf("bezalkoholowy", "orzeźwiający", "prosty")
+        ),
+        Cocktail(
+            name = "Lemoniada truskawkowa",
+            ingredients = listOf("Truskawki", "Sok z cytryny", "Cukier", "Woda gazowana"),
+            recipe = "Zmiksuj truskawki z sokiem z cytryny i cukrem, dolej wodę gazowaną, wymieszaj i podawaj z lodem.",
+            imageUrl = "https://www.odzywiajsiezdrowo.pl/wp-content/uploads/2023/07/Domowa-lemoniada-truskawkowa.jpg",
+            qualities = listOf("bezalkoholowy", "owocowy", "orzeźwiający")
+        ),
+        Cocktail(
+            name = "Smoothie mango-banan",
+            ingredients = listOf("Mango", "Banan", "Jogurt naturalny", "Miód"),
+            recipe = "Zblenduj mango, banana, jogurt i miód na gładką masę. Podawaj schłodzone.",
+            imageUrl = "https://image.jimcdn.com/app/cms/image/transf/none/path/s4646b755a50b5caf/image/ie292d6e981c320bf/version/1429879041/this-mango-banana-smoothie-is-so-creamy-mild-and-sweet-it-also-holds-really-well-in-the-fridge-so-you-can-make-it-the-night-before-www-homemadenutrition-com.jpg",
+            qualities = listOf("bezalkoholowy", "zdrowy")
         )
+
     )
 
     fun getCocktailByName(name: String) : Cocktail? {

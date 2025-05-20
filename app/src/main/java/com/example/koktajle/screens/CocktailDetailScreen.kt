@@ -25,6 +25,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -33,13 +34,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.koktajle.R
-import com.example.koktajle.models.Cocktail
 import com.example.koktajle.components.timerElement
+import com.example.koktajle.models.Cocktail
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CocktailDetailScreen(cocktail: Cocktail, navController: NavController, darkTheme: MutableState<Boolean>) {
     val context = LocalContext.current
+
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+    val paddingSize = if (isLandscape) 16.dp else 8.dp
 
     Scaffold(
         topBar = {
@@ -54,8 +60,10 @@ fun CocktailDetailScreen(cocktail: Cocktail, navController: NavController, darkT
                         model = cocktail.imageUrl,
                         contentDescription = null,
                         modifier = Modifier
-                            .height(75.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .size(65.dp)
+                            .padding(1.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
                     )
                 }
                 },
@@ -106,33 +114,51 @@ fun CocktailDetailScreen(cocktail: Cocktail, navController: NavController, darkT
                     .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
+//                    .pointerInput(Unit) {
+//                        detectHorizontalDragGestures { change, dragAmount ->
+//                            if (dragAmount > 100) {
+//                                val canPop = navController.previousBackStackEntry != null
+//                                if (canPop) {
+//                                    navController.popBackStack()
+//                                }
+//                            }
+//                        }
+//                    }
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val configuration = LocalConfiguration.current
                 val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
-                val headerSize = if (isLandscape) 40.sp else 28.sp
-                val textSize = if (isLandscape) 32.sp else 20.sp
+                val headerSize = if (isLandscape) 34.sp else 28.sp
+                val textSize = if (isLandscape) 28.sp else 20.sp
 
-//                AsyncImage(
-//                    model = cocktail.imageUrl,
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(240.dp)
-//                        .clip(RoundedCornerShape(16.dp))
-//                )
+                AsyncImage(
+                    model = cocktail.imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+                Spacer(modifier = Modifier.height(32.dp))
 
-                timerElement() // Upewnij się, że masz tę funkcję!
+                Text(text = cocktail.name,
+                    style = MaterialTheme.typography.headlineMedium.copy(fontSize = headerSize),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+
+                timerElement()
 
                 Text(text = "Składniki:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
                 cocktail.ingredients.forEach { ingredient ->
-                    Text(text = "• $ingredient", style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize))
+                    Text(text = "• $ingredient", style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize),modifier = Modifier.padding(paddingSize))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Sposób przygotowania:", style = MaterialTheme.typography.headlineSmall.copy(fontSize = headerSize))
-                Text(text = cocktail.recipe, style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize))
+                Text(text = cocktail.recipe, style = MaterialTheme.typography.bodyMedium.copy(fontSize = textSize, lineHeight = 36.sp), modifier = Modifier.padding(paddingSize))
             }
         }
     )

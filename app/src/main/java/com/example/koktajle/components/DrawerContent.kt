@@ -12,10 +12,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,15 +33,37 @@ fun DrawerContent(
     navController: NavController,
     drawerState: DrawerState,
     scope: CoroutineScope,
-    darkTheme: Boolean
+    darkTheme: MutableState<Boolean>
 ) {
-    val destinations = listOf(
-        Triple("Strona Główna", "home", if (darkTheme) R.drawable.ic_action_search_dark else R.drawable.ic_action_search_light),
-        Triple("Wszystkie koktajle", "all", if (darkTheme) R.drawable.ic_action_all_dark else R.drawable.ic_action_all_light),
-        Triple("Bezalkoholowe", "nonalcoholic", if (darkTheme) R.drawable.ic_action_search_dark else R.drawable.ic_action_search_light),
-        Triple("Z wódką", "vodka", if (darkTheme) R.drawable.ic_action_vodka_dark else R.drawable.ic_action_vodka_light),
-        Triple("Informacje", "info", if (darkTheme) R.drawable.ic_action_settings_dark else R.drawable.ic_action_settings_light)
-    )
+    val destinations =
+        listOf(
+            Triple(
+                "Strona Główna",
+                "home",
+                if (darkTheme.value) R.drawable.ic_action_search_light else R.drawable.ic_action_search_dark
+            ),
+            Triple(
+                "Wszystkie koktajle",
+                "all",
+                if (darkTheme.value) R.drawable.ic_action_all_dark else R.drawable.ic_action_all_light
+            ),
+            Triple(
+                "Bezalkoholowe",
+                "nonalcoholic",
+                if (darkTheme.value) R.drawable.ic_action_nonalcoholic_light else R.drawable.ic_action_nonalcoholic_light
+            ),
+            Triple(
+                "Z wódką",
+                "vodka",
+                if (darkTheme.value) R.drawable.ic_action_vodka_dark else R.drawable.ic_action_vodka_light
+            ),
+            Triple(
+                "Informacje",
+                "info",
+                if (darkTheme.value) R.drawable.ic_action_settings_dark else R.drawable.ic_action_settings_light
+            )
+        )
+
 
     Column(
         modifier = Modifier
@@ -49,6 +72,7 @@ fun DrawerContent(
             .padding(8.dp)
     ) {
         destinations.forEach { (label, route, icon) ->
+            val tintColor = if (darkTheme.value) Color.White else Color.Black
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -61,8 +85,9 @@ fun DrawerContent(
                     }
                     .padding(12.dp)
             ) {
-                androidx.compose.material3.Icon(
+                Icon(
                     painter = painterResource(id = icon),
+                    tint = tintColor,
                     contentDescription = "Szukaj",
                     modifier = Modifier.size(45.dp)
                 )
